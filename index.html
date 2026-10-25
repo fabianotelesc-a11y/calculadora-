@@ -1,0 +1,140 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Calculadora de Trocas</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;500;600;700&display=swap">
+<style>
+/* One column, phone first: brand navy band on top, white working area, one big answer card */
+:root {
+  --navy: #0A2240; --navy2: #1C3F6B; --sky: #AFC1D6; --tint: #F1F4F8; --line: #DCE2EA;
+  --ink: #1B2430; --muted: #5E6875; --white: #FFFFFF;
+  --font: Montserrat, "Helvetica Neue", Arial, sans-serif;
+  color-scheme: light;
+}
+* { box-sizing: border-box; }
+body { background: var(--white); color: var(--ink); font-family: var(--font); font-size: 18px; line-height: 1.5; }
+.band { background: var(--navy); color: var(--white);
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 28px 30px; }
+.wrap { max-width: 560px; margin: 0 auto; }
+.brand { font-size: 13px; letter-spacing: .28em; color: var(--sky); margin: 0 0 14px; font-weight: 500; }
+h1 { font-weight: 400; font-size: 30px; line-height: 1.15; margin: 0 0 8px; text-wrap: balance; }
+.lead { color: var(--sky); font-size: 16px; margin: 0; }
+main { padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 22px 40px; }
+.step { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 10px; }
+.tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 26px; }
+.tabs button { font: inherit; font-size: 17px; font-weight: 600; padding: 14px 8px; border-radius: 6px; border: 2px solid var(--line);
+  background: var(--white); color: var(--navy); cursor: pointer; }
+.tabs button[aria-pressed="true"] { background: var(--navy); border-color: var(--navy); color: var(--white); }
+.field { display: grid; gap: 8px; margin-bottom: 22px; }
+label { font-weight: 600; color: var(--navy); font-size: 17px; }
+select, input { font: inherit; font-size: 18px; width: 100%; padding: 14px 12px; border: 2px solid var(--line); border-radius: 6px;
+  background: var(--white); color: var(--ink); min-width: 0; }
+.qty { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 10px; }
+.unit { font-weight: 600; color: var(--muted); }
+:focus-visible { outline: 3px solid var(--navy2); outline-offset: 2px; }
+.hint { font-size: 15px; color: var(--muted); margin: 0; }
+.answer { background: var(--tint); border-left: 5px solid var(--navy); border-radius: 0 6px 6px 0; padding: 20px 20px 18px; margin-top: 6px; }
+.answer .k { font-size: 13px; letter-spacing: .14em; text-transform: uppercase; color: var(--muted); font-weight: 600; margin: 0 0 6px; }
+.big { font-size: 40px; font-weight: 700; color: var(--navy); line-height: 1.1; margin: 0 0 4px; font-variant-numeric: tabular-nums; }
+.food { font-size: 19px; font-weight: 600; color: var(--navy); margin: 0 0 10px; }
+.sub { font-size: 15px; color: var(--muted); margin: 0; }
+.note { margin-top: 28px; font-size: 15px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 16px; }
+.note p { margin: 0 0 8px; }
+</style>
+<meta name="description" content="Calculadora de trocas de alimentos · Fabiano Teles Nutricionista">
+<style>body{margin:0}</style>
+</head>
+<body>
+
+
+<header class="band"><div class="wrap">
+  <p class="brand">FABIANO TELES</p>
+  <h1>Calculadora de trocas</h1>
+  <p class="lead">Troque um alimento do seu plano por outro do mesmo grupo, sem fazer conta.</p>
+</div></header>
+
+<main><div class="wrap">
+  <p class="step">1 · O que você quer trocar?</p>
+  <div class="tabs" role="group" aria-label="Grupo de alimento">
+    <button type="button" id="t-prot" data-g="prot" aria-pressed="true">Proteína</button>
+    <button type="button" id="t-carb" data-g="carb" aria-pressed="false">Carboidrato</button>
+    <button type="button" id="t-fruta" data-g="fruta" aria-pressed="false">Fruta</button>
+    <button type="button" id="t-gord" data-g="gord" aria-pressed="false">Gordura</button>
+  </div>
+
+  <p class="step">2 · O que está no seu plano</p>
+  <div class="field" id="f-from">
+    <label for="from">Alimento do plano</label>
+    <select id="from"></select>
+  </div>
+  <div class="field">
+    <label for="qty" id="qty-label">Quantidade no plano</label>
+    <div class="qty"><input id="qty" type="number" inputmode="decimal" min="0" step="any"><span class="unit" id="unit">g</span></div>
+    <p class="hint" id="qty-hint">Digite as gramas que aparecem no seu plano.</p>
+  </div>
+
+  <p class="step">3 · Pelo que você quer trocar</p>
+  <div class="field">
+    <label for="to">Novo alimento</label>
+    <select id="to"></select>
+  </div>
+
+  <section class="answer" aria-live="polite">
+    <p class="k">Coma</p>
+    <p class="big" id="res">—</p>
+    <p class="food" id="res-food"></p>
+    <p class="sub" id="res-sub"></p>
+  </section>
+
+  <div class="note">
+    <p>Pese sempre o alimento pronto. Batata, batata-doce, mandioca e abóbora assadas ou na airfryer: escolha a opção "pesar crua".</p>
+    <p>Troque só dentro do mesmo grupo. Na dúvida, fale com a nossa equipe.</p>
+    <p>Valores pela TACO (Unicamp) e USDA, com base nas tabelas do seu plano.</p>
+  </div>
+</div></main>
+
+<script>
+const DATA = {"prot":[{"n":"Peito de frango grelhado, sem pele","g":100,"m":""},{"n":"Patinho grelhado","g":90,"m":""},{"n":"Filé-mignon grelhado","g":100,"m":""},{"n":"Coxão mole cozido","g":100,"m":""},{"n":"Lagarto cozido","g":95,"m":""},{"n":"Lombo suíno assado","g":90,"m":""},{"n":"Tilápia grelhada","g":120,"m":""},{"n":"Merluza assada","g":120,"m":""},{"n":"Sardinha assada","g":100,"m":""},{"n":"Atum em água, drenado","g":125,"m":""},{"n":"Camarão cozido","g":170,"m":""},{"n":"Clara de ovo","g":295,"m":""},{"n":"Salmão grelhado (só sáb. ou dom.)","g":145,"m":""},{"n":"Picanha sem capa, grelhada (só sáb. ou dom.)","g":100,"m":""},{"n":"Sobrecoxa de frango sem pele, assada (só sáb. ou dom.)","g":125,"m":""},{"n":"Ovos inteiros cozidos (≈ 5 unidades) (só sáb. ou dom.)","g":240,"m":""}],"carb":[{"n":"Arroz branco cozido","g":105,"m":"4 col. de sopa"},{"n":"Arroz integral cozido","g":115,"m":"4 col. de sopa"},{"n":"Mandioca (aipim) cozida","g":100,"m":"1 pedaço médio"},{"n":"Mandioca assada ou na airfryer (pesar crua)","g":83,"m":""},{"n":"Batata-doce cozida","g":165,"m":"1 unidade pequena"},{"n":"Batata-doce assada ou na airfryer (pesar crua)","g":106,"m":""},{"n":"Batata inglesa cozida","g":250,"m":"2 unidades médias"},{"n":"Batata inglesa assada ou na airfryer (pesar crua)","g":205,"m":""},{"n":"Mandioquinha (batata-baroa) cozida","g":160,"m":"1½ unidade média"},{"n":"Mandioquinha assada (pesar crua)","g":125,"m":""},{"n":"Abóbora cabotiá cozida","g":280,"m":"2 conchas cheias"},{"n":"Abóbora assada (pesar crua)","g":357,"m":""},{"n":"Cuscuz de milho cozido","g":120,"m":"1 fatia média"},{"n":"Macarrão cozido","g":95,"m":"1 pegador"},{"n":"Quinoa cozida","g":140,"m":"5 col. de sopa"},{"n":"Feijão carioca cozido (só grãos)","g":220,"m":"2 conchas médias"},{"n":"Lentilha cozida","g":185,"m":"1½ concha"},{"n":"Grão-de-bico cozido","g":110,"m":"5 col. de sopa"},{"n":"Milho verde (conserva, drenado)","g":175,"m":"7 col. de sopa"},{"n":"Pão francês","g":50,"m":"1 unidade"},{"n":"Pão de forma integral","g":60,"m":"2 fatias"},{"n":"Aveia em flocos","g":45,"m":"3 col. de sopa"}],"fruta":[{"n":"Abacaxi","g":120,"m":"1 fatia média"},{"n":"Acerola","g":190,"m":"25 unidades"},{"n":"Ameixa vermelha","g":110,"m":"2 unidades"},{"n":"Amora","g":155,"m":"1 xícara"},{"n":"Banana-nanica","g":65,"m":"½ unidade grande"},{"n":"Banana-prata","g":60,"m":"1 unidade pequena"},{"n":"Caqui","g":80,"m":"½ unidade"},{"n":"Cereja","g":95,"m":"12 unidades"},{"n":"Figo","g":145,"m":"3 unidades"},{"n":"Framboesa","g":125,"m":"1 xícara"},{"n":"Goiaba vermelha","g":115,"m":"1 unidade pequena"},{"n":"Jabuticaba","g":100,"m":"20 unidades"},{"n":"Kiwi","g":130,"m":"2 unidades"},{"n":"Laranja-pera","g":170,"m":"1 unidade média"},{"n":"Lichia","g":90,"m":"8 unidades"},{"n":"Maçã fuji","g":100,"m":"1 unidade pequena"},{"n":"Mamão formosa","g":130,"m":"1 fatia média"},{"n":"Mamão papaia","g":145,"m":"½ unidade"},{"n":"Manga palmer","g":75,"m":"½ xícara em cubos"},{"n":"Manga tommy","g":115,"m":"¾ xícara em cubos"},{"n":"Maracujá (polpa)","g":120,"m":"2 unidades"},{"n":"Melancia","g":185,"m":"1 fatia média"},{"n":"Melão","g":200,"m":"2 fatias médias"},{"n":"Mirtilo (blueberry)","g":105,"m":"¾ xícara"},{"n":"Morango","g":220,"m":"15 unidades"},{"n":"Pera williams","g":105,"m":"1 unidade pequena"},{"n":"Pêssego","g":160,"m":"2 unidades pequenas"},{"n":"Tangerina poncã","g":155,"m":"1 unidade média"},{"n":"Uva itália","g":110,"m":"12 bagos"},{"n":"Uva rubi","g":120,"m":"12 bagos"}],"gord":[{"n":"Azeite de oliva extravirgem","g":5,"m":"1 col. de chá"},{"n":"Abacate","g":60,"m":"2 col. de sopa"},{"n":"Castanha-do-pará","g":8,"m":"2 unidades"},{"n":"Castanha de caju torrada","g":11,"m":"5 unidades"},{"n":"Amêndoa","g":10,"m":"8 unidades"},{"n":"Nozes","g":8,"m":"3 metades"},{"n":"Pasta de amendoim integral","g":10,"m":"½ col. de sopa"},{"n":"Semente de chia","g":16,"m":"1½ col. de sopa"},{"n":"Manteiga","g":6,"m":"1 col. de chá rasa"}]};
+const DEF = { prot: ['Peito de frango grelhado, sem pele', 150], carb: ['Arroz branco cozido', 210], fruta: [null, 2], gord: ['Azeite de oliva extravirgem', 5] };
+let grp = 'prot';
+const $ = (id) => document.getElementById(id);
+const frac = (x) => { const q = Math.round(x * 4) / 4; const w = Math.floor(q), r = q - w; const s = r === .25 ? '¼' : r === .5 ? '½' : r === .75 ? '¾' : ''; return (w ? String(w) : (s ? '' : '0')) + s; };
+const portLabel = (p) => { const t = frac(p); return t + (Math.round(p * 4) / 4 >= 2 ? ' porções' : ' porção'); };
+
+function fill(sel, list, val) {
+  sel.innerHTML = list.map((x, i) => `<option value="${i}">${x.n}</option>`).join('');
+  const i = list.findIndex((x) => x.n === val); sel.value = String(i >= 0 ? i : 0);
+}
+function setGroup(g) {
+  grp = g;
+  document.querySelectorAll('.tabs button').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.g === g)));
+  const list = DATA[g]; const fruta = g === 'fruta';
+  $('f-from').hidden = fruta;
+  if (!fruta) fill($('from'), list, DEF[g][0]);
+  fill($('to'), list, fruta ? 'Banana-prata' : list.find((x) => x.n !== DEF[g][0]).n);
+  $('qty').value = DEF[g][1];
+  $('unit').textContent = fruta ? 'porções' : 'g';
+  $('qty-label').textContent = fruta ? 'Porções de fruta no plano' : 'Quantidade no plano';
+  $('qty-hint').textContent = fruta ? 'O plano mostra a fruta em porções. Ex.: 2 porções.' : 'Digite as gramas que aparecem no seu plano.';
+  calc();
+}
+function calc() {
+  const list = DATA[grp]; const q = parseFloat(String($('qty').value).replace(',', '.'));
+  const to = list[+$('to').value];
+  if (!(q > 0) || !to) { $('res').textContent = '—'; $('res-food').textContent = ''; $('res-sub').textContent = 'Digite a quantidade do seu plano.'; return; }
+  const p = grp === 'fruta' ? q : q / list[+$('from').value].g;
+  const g = Math.round(p * to.g / 5) * 5 || Math.round(p * to.g);
+  $('res').textContent = g + ' g';
+  $('res-food').textContent = 'de ' + to.n.charAt(0).toLowerCase() + to.n.slice(1);
+  $('res-sub').textContent = '= ' + portLabel(p) + (to.m ? ' · 1 porção = ' + to.m : '');
+}
+document.querySelectorAll('.tabs button').forEach((b) => b.addEventListener('click', () => setGroup(b.dataset.g)));
+['from', 'to', 'qty'].forEach((id) => $(id).addEventListener('input', calc));
+setGroup('prot');
+</script>
+
+</body>
+</html>
